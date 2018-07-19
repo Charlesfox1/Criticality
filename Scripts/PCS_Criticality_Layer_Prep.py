@@ -18,16 +18,17 @@ ctrl = pd.read_excel(dash, sheetname = "AGGREGATE", index_col = 0)
 critdf = pd.read_excel(dash, sheetname = "CRITICALITY", index_col = 0)
 district = ctrl['Weight'].loc['DISTRICT']
 
-logging.basicConfig(filename = os.path.join(path, 'runtime', district, "PCS_Criticality_Layer_Prep.log"), level=logging.INFO, format="%(asctime)s-%(levelname)s: %(message)s")
+logging.basicConfig(filename = os.path.join(path, 'PCS\Criticality\Runtime', "PCS_Criticality_Layer_Prep.log"), level=logging.INFO, format="%(asctime)s-%(levelname)s: %(message)s")
 logging.info("Starting Layer Prep Process")
 print "Running: Criticality Layer Preparation Tool for %s. Do not interrupt" % district
+
 #Settings
 crs_in = {'init': 'epsg:4326'}   #WGS 84
 
 #Folders
-OD_IN = os.path.join(path, 'PCS\Criticality\input', '%s' % district)
-DATA_IN = os.path.join(path, 'PCS\Criticality\Vietnam_Data_Layers')
-NETWORK_IN = os.path.join(path, r'runtime\%s\\' % district, 'Network.csv')
+OD_IN = os.path.join(path, 'PCS\Criticality\Input', '%s' % district)
+DATA_IN = os.path.join(path, 'PCS\Criticality\Data_Layers')
+NETWORK_IN = os.path.join(OD_IN, 'Network.csv')
 if not os.path.isdir(OD_IN):
         os.mkdir(OD_IN)
 #Files

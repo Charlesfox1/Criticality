@@ -34,7 +34,7 @@ if module_path not in sys.path:
 from network_lib import network_prep as net_p
 from network_lib import od_prep as od_p
 
-## Control - verbose prints more to console at Runtime, helpful for debugging. Similarly, dump will dump useful files to .csv midway through process
+## Control - verbose prints more to console at runtime, helpful for debugging. Similarly, dump will dump useful files to .csv midway through process
 verbose = 1
 dump = 1
 
@@ -49,11 +49,14 @@ def main(adminIsPoint = False):
     dash = os.path.join(path,r'dashboard.xlsm')
     ctrl = pd.read_excel(dash, sheetname = "AGGREGATE", index_col = 0)
 
-    ## Define operative district. Note, this parameter can be anything - it is the sub folder in input, Runtime where files are drawn from
+    ## Define operative district. Note, this parameter can be anything - it is the sub folder in input, runtime where files are drawn from
     district = ctrl['Weight'].loc['DISTRICT']
 
+    # ensure folders exist
+    runtime = os.path.join(path, r'PCS\Criticality\runtime\%s\\' % district)
+
     ## Add logging
-    logging.basicConfig(filename = os.path.join(path, 'runtime', district, "PCS_Criticality_log.log"), level=logging.INFO, format="%(asctime)s-%(levelname)s: %(message)s")
+    logging.basicConfig(filename = os.path.join(runtime, "PCS_Criticality.log"), level=logging.INFO, format="%(asctime)s-%(levelname)s: %(message)s")
     logging.info("Starting Criticality Process")
     print "Running: Criticality Analysis on %s. Do not interrupt" % district
 
@@ -61,25 +64,21 @@ def main(adminIsPoint = False):
     # outputs
     outpath = os.path.join(path, 'Outputs', '%s' % district)
 
-    # ensure folders exist
-    runtime = os.path.join(path, r'PCS\Criticality\runtime\%s\\' % district)
     for d in [outpath, runtime]:
         if not os.path.isdir(d):
             os.mkdir(d)
 
     ## Input file setting
-    # location of road network
-    NETWORK_IN = os.path.join(path, r'runtime\%s\\' % district)
 
     # location of OD
-    OD_IN = os.path.join(path, 'PCS\Criticality\input', '%s' % district)
+    OD_IN = os.path.join(path, 'PCS\Criticality\Input', '%s' % district)
 
     # location of administrative boundaries file
-    DATA_IN = os.path.join(path, 'PCS\Criticality\Vietnam_Data_Layers')
+    DATA_IN = os.path.join(path, 'PCS\Criticality\Data_Layers')
     inAdmin = os.path.join(DATA_IN,'Poverty_Communes_2009.shp')
 
     # road network import. Must be a .csv including geometry information of roads.
-    inNetworkFile = os.path.join(NETWORK_IN, 'Network.csv')
+    inNetworkFile = os.path.join(OD_IN, 'Network.csv')
 
     # set WGS 84 coordinate reference system
     crs_in = {'init': 'epsg:4326'}
@@ -90,7 +89,7 @@ def main(adminIsPoint = False):
             os.mkdir(d)
 
     # error checking - Check input data existence
-    for curFile in [dash, inNetworkFile, inAdmin,DATA_IN,OD_IN,NETWORK_IN]:
+    for curFile in [dash, inNetworkFile, inAdmin,DATA_IN,OD_IN]:
         if not os.path.exists(curFile):
             logging.error("No input found: %s" % curFile)
             raise ValueError("No input found: %s" % curFile)
@@ -100,6 +99,8 @@ def main(adminIsPoint = False):
     ctrldf = pd.read_excel(dash, sheetname = "CRITICALITY", index_col = 'COL_ID')
 
     #Inputs
+
+    # setting network shapefile location
     network = os.path.join(runtime,'Network.shp')
 
     ## Network Preparation
@@ -128,7 +129,7 @@ def main(adminIsPoint = False):
     def makeOrigin(n, ctrldf):
         origindict = {
             'name': ctrldf['OName'][n],
-            'file': os.path.join(path,'PCS','Criticality','input',district,'%s.shp'% ctrldf['OName'][n]),
+            'file': os.path.join(path,'PCS','Criticality','Input',district,'%s.shp'% ctrldf['OName'][n]),
             'scalar_column': ctrldf['OScalar'][n]
             }
         return origindict
@@ -137,7 +138,7 @@ def main(adminIsPoint = False):
     def makeDestination(n, ctrldf):
         destdict = {
             'name': ctrldf['DName'][n],
-            'file': os.path.join(path,'PCS','Criticality','input',district,'%s.shp'% ctrldf['DName'][n]),
+            'file': os.path.join(path,'PCS','Criticality','Input',district,'%s.shp'% ctrldf['DName'][n]),
             'penalty': ctrldf['DPenalty'][n],
             'importance':ctrldf['DImportance'][n],
             'annual':ctrldf['DAnnual'][n],
