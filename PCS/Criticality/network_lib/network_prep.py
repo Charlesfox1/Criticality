@@ -19,14 +19,12 @@ def prepare_centroids_network2(centroid, network):
     Take transport network and centroids shapefiles as inputs
     then returns a geodataframe of the transport network with
     indicated centroid nodes
-
     Parameters
     ------------
     centroid: str
         string of centroid shapefile's address+filename
     network: str
         string of network shapefile's address+name
-
     Returns
     ------------
     gdf_points: GeoDataFrame
@@ -230,16 +228,16 @@ def prepare_newOD(centroid, gdf_origin):
 
     #read the centroid shapefile into geodataframe
     gdf_points = gp.read_file(centroid)
-    
+
     gdf=copy.deepcopy(gdf_origin)
-    
+
     del gdf['FNODE_']
     del gdf['TNODE_']
-    
+
     # Compute the start- and end-position based on linestring
     gdf['Start_pos'] = gdf.geometry.apply(lambda x: x.coords[0])
     gdf['End_pos'] = gdf.geometry.apply(lambda x: x.coords[-1])
-    
+
     # Create Series of unique nodes and their associated position
     s_points = gdf.Start_pos.append(gdf.End_pos).reset_index(drop=True)
     s_points = s_points.drop_duplicates()

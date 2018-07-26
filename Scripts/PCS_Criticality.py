@@ -117,6 +117,7 @@ def main(adminIsPoint = False):
     ginNetwork = gpd.GeoDataFrame(inNetwork,crs = crs_in, geometry = inNetwork['Line_Geometry'].map(shapely.wkt.loads))
 
     # set up Shapefile of road network
+
     ginNetwork.to_file(network, driver = 'ESRI Shapefile')
     logging.info("Successfully loaded data")
 
@@ -163,17 +164,20 @@ def main(adminIsPoint = False):
         '%s' % ctrldf['DName'][3]: destination_4,
         '%s' % ctrldf['DName'][4]: destination_5,
         }
-    logging.debug("Opened origins and destinations")
+    logging.info("Opened origins and destinations")
 
     # Prepation of network via TU Delft code
     gdf_points, gdf_node_pos, gdf = net_p.prepare_centroids_network(origin_1['file'], network)
 
-    # Create Networkx MultiGraph object from the GeoDataFrame
+    gdf.to_csv(os.path.join(r'C:\Users\charl\Documents\GitHub\Criticality\PCS\Criticality\Runtime\[district_1]','gdf.csv'))
+    gdf_node_pos.to_csv(os.path.join(r'C:\Users\charl\Documents\GitHub\Criticality\PCS\Criticality\Runtime\[district_1]','gdf_node_pos.csv'))
+
+        # Create Networkx MultiGraph object from the GeoDataFrame
     G = net_p.gdf_to_simplified_multidigraph(gdf_node_pos, gdf, simplify=False)
 
     # Change the MultiGraph object to Graph object to reduce computation cost
     G_tograph = net_p.multigraph_to_graph(G)
-    logging.debug('Loaded road network: number of disconnected components is: %d' % nx.number_connected_components(G_tograph))
+    logging.info('Loaded road network: number of disconnected components is: %d' % nx.number_connected_components(G_tograph))
 
     # Observe the properties of the Graph object
     nx.info(G_tograph)
